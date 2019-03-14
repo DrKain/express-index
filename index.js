@@ -10,7 +10,15 @@ function formatBytes(a, b) {
 
 function deepreaddirSync(src, config){
     var map = {};
-    fs.readdirSync(src).map(function(file){
+    var files = fs.readdirSync(src);
+
+    if(config['blacklist'] !== null){
+        var f = [];
+        files.map(function(file){ if(config['blacklist'].indexOf(file) === -1) f.push(file); });
+        files = f;
+    }
+
+    files.map(function(file){
         var stat = fs.statSync(path.join(src, file));
         if(stat && stat.isDirectory() === true){
             map[file] = deepreaddirSync(path.join(src, file), config);
@@ -37,7 +45,8 @@ module.exports = function(location, config){
     config = Object.assign({
         render : "json",
         template : null,
-        location : location
+        location : location,
+        blacklist : null // array of file or directory names
     }, config);
 
     // Actual render logic
