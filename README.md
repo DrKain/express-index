@@ -51,6 +51,17 @@ Your custom template will be rendered instead of the default.
 The variables passed to the file will be `exindex` - containing all the files and information, `ex_title` = `req.originalUrl`.
 
 
+Blacklist files and directories:  
+---------------------  
+  
+```javascript  
+app.use("/index", exindex("public", {
+    render : "ejs",
+    blacklist : ["nuclear_launch_codes.txt", "documents"]
+}));
+```  
+
+
 Supporting other view engines?
 ---------------------
 
