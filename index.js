@@ -4,19 +4,20 @@ var ejs     = require('ejs');
 var _file   = require('file');
 var moment  = require('moment');
 
-function scanDir(target, _root_){
+function scanDir(target, _root_, blacklist){
     target = target.replace(/\\/g, '/');
     if(typeof _root_ === "undefined") _root_ = target;
-
     var outfiles = [];
     var uni = function(x){ return moment(x).unix() };
     // Walk through directory, return dirs and files
     _file.walkSync(target, function(dir, lvl, files){
+        var valid   = true;
         // Predefine top level & root
-        var top = { l : path.relative(path.join(target, '../'), dir), s : 0, m : 0 };
+        var top = { l : path.relative(path.join(target, '../'), dir).replace(/\\/g, '/'), s : 0, m : 0 };
         // Cycle through files
         files = files.map(function(file){
-            var loc     = path.join(dir, file);
+            var loc     = path.join(dir, file).replace(/\\/g, '/');
+
             var stat    = fs.statSync( loc );
             // Add top level stats
             if(top.s < stat.size) top.s += stat.size;
@@ -30,8 +31,10 @@ function scanDir(target, _root_){
             // Join files in same directory
         }).join("|");
         // Fix timestamp and skip empty files
-        files = [ top.l, moment(top.m).format("L LTS"), top.s ].join("*") + "|" + files;
-        files.length > 0 ? outfiles.push(files) : null;
+        if(valid){
+            files = [ top.l, moment(top.m).format("L LTS"), top.s ].join("*") + "|" + files;
+            files.length > 0 ? outfiles.push(files) : null;
+        }
     });
 
     return outfiles;
@@ -48,12 +51,13 @@ module.exports = function(location, config){
         name : 'Index of /' + path.basename(location),
         cooldown : 1000 * 60 * 10, // 10 minutes
         cache : null,
-        template : "default"
+        template : "default",
+        blacklist : [] // this won't be easy
     }, config);
     return function(req, res){
         var c = {
             extime : moment().format('L LTS'),
-            exindex : compactJS( scanDir(location, config.root) ),
+            exindex : compactJS( scanDir(location, config.root, config.blacklist) ),
             exname : config.name
         };
         ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){

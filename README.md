@@ -45,7 +45,7 @@ Preview:
 Blacklist files and directories:
 ---------------------
 
-Not yet reimplemented, It will be done by 0.0.9
+Not yet reimplemented, I need to give this some more thought..
 
 **Additional Notes**
 - Please report any issues [here](https://github.com/DrKain/express-index/issues)
