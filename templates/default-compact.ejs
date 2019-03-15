@@ -5,17 +5,17 @@
     <title><%= exname %></title>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
-    <style>body,html{font-size:13px;font-family:Verdana, helvetica, arial, sans-serif;margin:0;padding:0;cursor:default}table{text-align:left;width:100%;border-collapse:collapse}table tr td,table tr th{border:solid 1px #ccc;padding:5px 10px}table tr th:first-of-type{width:16px}table tr th:nth-of-type(2){width:40%}table tr th{background:palegoldenrod;font-weight:bold}table tr:nth-child(odd){background:#f8f8f8}table td a,table td span{text-decoration:none;color:blue;cursor:pointer}table td a:hover,table td span:hover{text-decoration:underline}#app > div > h5{background:palegoldenrod;margin:0;padding:3px 5px;font-size:10px;font-weight:normal}#app > div > span{position:absolute;top:3px;right:5px;font-size:10px}#app > div{position:relative}#app > header{background:palegoldenrod;padding:5px}#app > header > h3{margin:0;font-size:15px;padding:5px}#app > header > p{margin:0;font-size:10px}</style>
+    <style>body,html{font-size:10px;font-family:Verdana, helvetica, arial, sans-serif;margin:0;padding:0;cursor:default}table{text-align:left;width:100%;border-collapse:collapse}table tr td,table tr th{border:solid 1px #ccc;padding: 2px 7px}table tr th:first-of-type{width:16px}table tr th:nth-of-type(2){width:40%}table tr th{background:palegoldenrod;font-weight:bold}table tr:nth-child(odd){background:#f8f8f8}table td a,table td span{text-decoration:none;color:blue;cursor:pointer}table td a:hover,table td span:hover{text-decoration:underline}#app > div > h5{background:palegoldenrod;margin:0;padding: 3px 5px;font-size:10px;font-weight:normal}#app > div > span{position:absolute;top:3px;right:5px;font-size:10px}#app > div{position:relative}#app > header{background:palegoldenrod;padding:5px}#app > header > h3{margin:0;font-size:15px;padding:5px}#app > header > p{margin:0;font-size:10px}</style>
 </head>
 <body>
 <script>
-var icon_file   = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAOCAYAAAAbvf3sAAAAYUlEQVR4nGNkYGBgqKmp+c+AB7S0tDCiCNTU1PzHBdavX/8f2UAmfCbDgLGxMdwVRGlA1sRCSGFAQACcffbsWeJtgAE6afj+/TtRir9//z5o/UAKYGRgYGAoLi7Gm/iQAQC+qjWGF5ecJwAAAABJRU5ErkJggg==";
-var icon_folder = "data:image/gif;base64,R0lGODlhEAAOALMIAJdaH+C6eJ9oJMOHNK1zLf/inv/Sg////////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAgALAAAAAAQAA4AAARAEMlJq7136IEnOeBBdENhGkGwadQQviE3lWZtAxRhE3zvIzpT0HYaCQwGAnLJHCEASabU+VRKl1SJYMvtdr6ICAA7";
-var icon_arrow  = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuNWRHWFIAAAFKSURBVDhPY6AZ+A8EDKGrmKFc0gDPtv//5XcDDYjfzwEVIhLU/2eSAmqU3wU1IO0MF1SGCJB2hlV7z7//clt/Q/C2P/8liTYAqDn+8Pf/0ss+oWC5bX8x8cYfB+VWfc6Vm/tCCRhSjEBn72fJOfj5v/j050RhsRkvrknMeNEuNeulAdgA4eprK4Vqrv4Xqr2GH1dd+S/ceOu/SNeDayKd99pFu+5DDOCtuCYs1nTzqHDz7f/oWKr9DgaWbr19TarldrtUy00DYFwDvQAEYq13xWU67x4Dmvofhrlb7/3X670/QW/qvT5krDvtQbbO1Hv2VpMfSoE1w4BIywNJ2UkPj4v1P/4Pw5L1T0mIRiCQmPhMVGryk4Pi018AA+zFf8mZJBoAAkBNItKzXh6TWvaGPANAQGTGK0m1llcF8vPvk5iUkQEshGkLGBgADLf8U4fFVOgAAAAASUVORK5CYII=";
+    var icon_file   = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAOCAYAAAAbvf3sAAAAYUlEQVR4nGNkYGBgqKmp+c+AB7S0tDCiCNTU1PzHBdavX/8f2UAmfCbDgLGxMdwVRGlA1sRCSGFAQACcffbsWeJtgAE6afj+/TtRir9//z5o/UAKYGRgYGAoLi7Gm/iQAQC+qjWGF5ecJwAAAABJRU5ErkJggg==";
+    var icon_folder = "data:image/gif;base64,R0lGODlhEAAOALMIAJdaH+C6eJ9oJMOHNK1zLf/inv/Sg////////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAgALAAAAAAQAA4AAARAEMlJq7136IEnOeBBdENhGkGwadQQviE3lWZtAxRhE3zvIzpT0HYaCQwGAnLJHCEASabU+VRKl1SJYMvtdr6ICAA7";
+    var icon_arrow  = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuNWRHWFIAAAFKSURBVDhPY6AZ+A8EDKGrmKFc0gDPtv//5XcDDYjfzwEVIhLU/2eSAmqU3wU1IO0MF1SGCJB2hlV7z7//clt/Q/C2P/8liTYAqDn+8Pf/0ss+oWC5bX8x8cYfB+VWfc6Vm/tCCRhSjEBn72fJOfj5v/j050RhsRkvrknMeNEuNeulAdgA4eprK4Vqrv4Xqr2GH1dd+S/ceOu/SNeDayKd99pFu+5DDOCtuCYs1nTzqHDz7f/oWKr9DgaWbr19TarldrtUy00DYFwDvQAEYq13xWU67x4Dmvofhrlb7/3X670/QW/qvT5krDvtQbbO1Hv2VpMfSoE1w4BIywNJ2UkPj4v1P/4Pw5L1T0mIRiCQmPhMVGryk4Pi018AA+zFf8mZJBoAAkBNItKzXh6TWvaGPANAQGTGK0m1llcF8vPvk5iUkQEshGkLGBgADLf8U4fFVOgAAAAASUVORK5CYII=";
 
-var D = [];
-/* Thank you snap2html for this fantastic data compression idea. Decompression was a pain in the ass but it's so much better than a giant JSON dump */
-<%- exindex %>
+    var D = [];
+    /* Thank you snap2html for this fantastic data compression idea. Decompression was a pain in the ass but it's so much better than a giant JSON dump */
+    <%- exindex %>
 </script>
 
 <div id="app">

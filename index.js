@@ -55,14 +55,28 @@ module.exports = function(location, config){
         blacklist : [] // this won't be easy
     }, config);
     return function(req, res){
+        var cacheready = false;
         var c = {
             extime : moment().format('L LTS'),
             exindex : compactJS( scanDir(location, config.root, config.blacklist) ),
             exname : config.name
         };
-        ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){
-            if(config.cache) fs.writeFileSync(config.cache, html);
-            res.send(html);
-        });
+
+        if(config.cache !== null){
+            if( fs.existsSync(config.cache) === true ){
+                var now = moment().unix();
+                var then = moment(fs.statSync(config.cache)['mtime']).unix();
+                if((now - then) * 1000 >= config.cooldown) cacheready = true;
+            } else cacheready = true;
+        } else cacheready = true;
+
+        if(cacheready === true){
+            ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){
+                if(config.cache && cacheready === true) fs.writeFileSync(config.cache, html);
+                res.send(html);
+            });
+        } else{
+            res.sendFile(config.cache);
+        }
     }
 };

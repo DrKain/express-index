@@ -40,7 +40,37 @@ Preview:
 
 ##### (outdated, new preview coming soon)
 
-[![Preview](https://i.imgur.com/u2pt0Kn.gif)](https://i.imgur.com/u2pt0Kn.gif)
+[![Preview](https://i.imgur.com/Jb4Urrw.gif)](https://i.imgur.com/Jb4Urrw.gif)
+
+File Cache:
+---------------------
+
+In large directories it can take several seconds to several minutes to generate an index, This is why file caching can be very useful.
+Basic example of cache in use:
+
+```javascript
+app.use("/", exindex("public", {
+    root  : "",
+    cooldown : 10000, // 10 seconds
+    cache : __dirname + "/public/view.html"
+}));
+```
+
+This will only re-generate a file to `/public/view.html` every 10 seconds (if the route is requested).
+
+Templates / Themes:
+---------------------
+
+I've taken the liberty to create four templates. These are `default`, `default-compact`, `default-night` and `default-night-compact`.
+To change the template just specify the name in the config.
+
+```javascript
+app.use("/", exindex("public", {
+    template : "default-night",
+    root  : ""
+}));
+```
+
 
 Blacklist files and directories:
 ---------------------

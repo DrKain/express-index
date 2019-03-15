@@ -1,6 +1,6 @@
 {
   "name": "express-index",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "dependencies": {
     "ejs": "^2.6.1",
     "express": "^4.16.4",
