@@ -12,8 +12,6 @@ Install
 ---------------------
 
 ```npm install --save express-index```
-##### Then EJS for the `ejs` template
-```npm install --save ejs```
 
 Usage
 ---------------------
@@ -24,49 +22,30 @@ var exindex = require('express-index');
 var app     = express();
 
 app.use(express.static("public"));
-app.use(exindex("public", { render : "ejs" }));
+app.use("/", exindex("public", { root : "" }));
 
 app.listen(3000);
 ```
 
+Config `root` determines the root path that the files will be linked from.
+Defaults to system path. You can also set the root to another website or drive, EG:
+
+```javascript
+app.use(exindex("public", { root : "https://website.com" });
+```
+Then the files will be linked like:  https://website.com/file/on/path.txt
+
 Preview:
 ---------------------
 
-##### Note, You can use `ejs-dark` for an alternative dark theme.
+##### (outdated, new preview coming soon)
 
 [![Preview](https://i.imgur.com/u2pt0Kn.gif)](https://i.imgur.com/u2pt0Kn.gif)
 
-Custom Templates
+Blacklist files and directories:
 ---------------------
 
-You can use your own render if you'd like, Simply specify the file in the options.
-
-```javascript
-app.use(exindex("public", {
-    render : "ejs",
-    template : "C:/path/to/template.ejs"
-}));
-```
-Your custom template will be rendered instead of the default.
-The variables passed to the file will be `exindex` - containing all the files and information, `ex_title` = `req.originalUrl`.
-
-
-Blacklist files and directories:  
----------------------  
-  
-```javascript  
-app.use("/index", exindex("public", {
-    render : "ejs",
-    blacklist : ["nuclear_launch_codes.txt", "documents"]
-}));
-```  
-
-
-Supporting other view engines?
----------------------
-
-Right now the only view engine supported is ejs. If you would like to add one please feel free to create a pull request, I would gladly accept the help.
-Otherwise I'll add them as soon as I get around to it.
+Not yet reimplemented, It will be done by 0.0.9
 
 **Additional Notes**
 - Please report any issues [here](https://github.com/DrKain/express-index/issues)

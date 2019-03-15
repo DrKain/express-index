@@ -1,88 +1,64 @@
 var fs      = require('fs');
 var path    = require('path');
+var ejs     = require('ejs');
+var _file   = require('file');
+var moment  = require('moment');
 
-function formatBytes(a, b) {
-    if (0 === a) return "0 Bytes";
-    var c = 1024, d = b || 2, e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-        f = Math.floor(Math.log(a) / Math.log(c));
-    return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f];
-}
+function scanDir(target, _root_){
+    target = target.replace(/\\/g, '/');
+    if(typeof _root_ === "undefined") _root_ = target;
 
-function deepreaddirSync(src, config){
-    var map = {};
-    var files = fs.readdirSync(src);
-
-    if(config['blacklist'] !== null){
-        var f = [];
-        files.map(function(file){ if(config['blacklist'].indexOf(file) === -1) f.push(file); });
-        files = f;
-    }
-
-    files.map(function(file){
-        var stat = fs.statSync(path.join(src, file));
-        if(stat && stat.isDirectory() === true){
-            map[file] = deepreaddirSync(path.join(src, file), config);
-        } else{
-            map[file] = {
-                loc     : path.relative(config['location'], path.join(src, file)),
-                size    : stat.size,
-                size_f  : formatBytes(stat.size),
-                mtime   : stat['mtime'], // modified
-                ctime   : stat['ctime'] // created
-            };
-        }
+    var outfiles = [];
+    var uni = function(x){ return moment(x).unix() };
+    // Walk through directory, return dirs and files
+    _file.walkSync(target, function(dir, lvl, files){
+        // Predefine top level & root
+        var top = { l : path.relative(path.join(target, '../'), dir), s : 0, m : 0 };
+        // Cycle through files
+        files = files.map(function(file){
+            var loc     = path.join(dir, file);
+            var stat    = fs.statSync( loc );
+            // Add top level stats
+            if(top.s < stat.size) top.s += stat.size;
+            if( uni(top.m) < uni(stat.mtime) ) top.m = stat.mtime;
+            // Return compacted string
+            return [
+                path.join(_root_, path.relative(target, loc)).replace(/\\/g, '/'),
+                moment(stat['mtime']).format("L LTS"),
+                stat.size
+            ].join("*");
+            // Join files in same directory
+        }).join("|");
+        // Fix timestamp and skip empty files
+        files = [ top.l, moment(top.m).format("L LTS"), top.s ].join("*") + "|" + files;
+        files.length > 0 ? outfiles.push(files) : null;
     });
-    return map;
+
+    return outfiles;
 }
 
-var _match = {
-    'json'      : 'fs',
-    'ejs'       : 'ejs',
-    'ejs-dark'  : 'ejs'
-};
+function compactJS(data){
+    return data.map(function(line){
+        return `D.push("${line}")`;
+    }).join("\n").replace(/\\/g, '/');
+}
 
 module.exports = function(location, config){
     config = Object.assign({
-        render : "json",
-        template : null,
-        location : location,
-        blacklist : null // array of file or directory names
+        name : 'Index of /' + path.basename(location),
+        cooldown : 1000 * 60 * 10, // 10 minutes
+        cache : null,
+        template : "default"
     }, config);
-
-    // Actual render logic
-    var renderFile = {
-        "json" : function(res, data){
-            res.json(data.exindex);
-        },
-        "ejs" : function(res, data, template){
-            if(!template) template = path.join(__dirname, "templates/index.ejs");
-            require('ejs').renderFile(template, data, null, function(err, str){
-                if(!err) res.send(str);
-                else throw new Error(err);
-            });
-        },
-        "ejs-dark" : function(res, data, template){
-            if(!template) template = path.join(__dirname, "templates/index-dark.ejs");
-            renderFile['ejs'](res, data, template);
-        }
-    };
-
-    function verifyEngine(eng){
-        try{
-            require.resolve(_match[eng]);
-            return true;
-        } catch(e){
-            return false;
-        }
-    }
-
-    // Handle route
-    return function(req, res, next){
-        var data        = { exindex : deepreaddirSync(location, config) };
-        if( verifyEngine(config['render']) === true ) {
-            renderFile[config['render']](res, Object.assign({
-                ex_title : req.originalUrl
-            }, data), config['template']);
-        } else res.send("Invalid render engine specified: " + config['render'] + ". Please make sure the module is installed and supported")
+    return function(req, res){
+        var c = {
+            extime : moment().format('L LTS'),
+            exindex : compactJS( scanDir(location, config.root) ),
+            exname : config.name
+        };
+        ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){
+            if(config.cache) fs.writeFileSync(config.cache, html);
+            res.send(html);
+        });
     }
 };

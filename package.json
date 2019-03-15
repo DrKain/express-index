@@ -1,7 +1,12 @@
 {
   "name": "express-index",
-  "version": "0.0.4",
-  "dependencies": {},
+  "version": "0.0.8",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "file": "^0.2.2",
+    "moment": "^2.24.0"
+  },
   "author": {
     "name": "Kain",
     "url": "https://ksir.pw"

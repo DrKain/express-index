@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= exname %></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
+    <style>
+        body, html{
+            font-size: 13px;
+            font-family: Verdana, helvetica, arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            cursor: default;
+        }
+        table{
+            text-align: left;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table tr th,
+        table tr td{
+            border: solid 1px #ccc;
+            padding: 5px 10px;
+        }
+        table tr th:first-of-type{
+            width: 16px;
+        }
+        table tr th:nth-of-type(2){
+            width: 40%;
+        }
+        table tr th{
+            background: palegoldenrod;
+            font-weight: bold;
+        }
+        table tr:nth-child(odd){
+            background: #f8f8f8;
+        }
+        table td a,
+        table td span{
+            text-decoration: none;
+            color: blue;
+            cursor: pointer;
+        }
+        table td span:hover,
+        table td a:hover{
+            text-decoration: underline;
+        }
+        #app > div > h5{
+            background: palegoldenrod;
+            margin: 0;
+            padding: 3px 5px;
+            font-size: 10px;
+            font-weight: normal;
+        }
+        #app > div > span{
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            font-size: 10px;
+        }
+        #app > div{
+            position: relative;
+        }
+        #app > header{
+            background: palegoldenrod;
+            padding: 5px;
+        }
+        #app > header > h3{
+            margin: 0;
+            font-size: 15px;
+            padding: 5px;
+        }
+        #app > header > p{
+            margin: 0;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+<script>
+var icon_file   = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAOCAYAAAAbvf3sAAAAYUlEQVR4nGNkYGBgqKmp+c+AB7S0tDCiCNTU1PzHBdavX/8f2UAmfCbDgLGxMdwVRGlA1sRCSGFAQACcffbsWeJtgAE6afj+/TtRir9//z5o/UAKYGRgYGAoLi7Gm/iQAQC+qjWGF5ecJwAAAABJRU5ErkJggg==";
+var icon_folder = "data:image/gif;base64,R0lGODlhEAAOALMIAJdaH+C6eJ9oJMOHNK1zLf/inv/Sg////////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAgALAAAAAAQAA4AAARAEMlJq7136IEnOeBBdENhGkGwadQQviE3lWZtAxRhE3zvIzpT0HYaCQwGAnLJHCEASabU+VRKl1SJYMvtdr6ICAA7";
+var icon_arrow  = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjEuNWRHWFIAAAFKSURBVDhPY6AZ+A8EDKGrmKFc0gDPtv//5XcDDYjfzwEVIhLU/2eSAmqU3wU1IO0MF1SGCJB2hlV7z7//clt/Q/C2P/8liTYAqDn+8Pf/0ss+oWC5bX8x8cYfB+VWfc6Vm/tCCRhSjEBn72fJOfj5v/j050RhsRkvrknMeNEuNeulAdgA4eprK4Vqrv4Xqr2GH1dd+S/ceOu/SNeDayKd99pFu+5DDOCtuCYs1nTzqHDz7f/oWKr9DgaWbr19TarldrtUy00DYFwDvQAEYq13xWU67x4Dmvofhrlb7/3X670/QW/qvT5krDvtQbbO1Hv2VpMfSoE1w4BIywNJ2UkPj4v1P/4Pw5L1T0mIRiCQmPhMVGryk4Pi018AA+zFf8mZJBoAAkBNItKzXh6TWvaGPANAQGTGK0m1llcF8vPvk5iUkQEshGkLGBgADLf8U4fFVOgAAAAASUVORK5CYII=";
+
+var D = [];
+/* Thank you snap2html for this fantastic data compression idea. Decompression was a pain in the ass but it's so much better than a giant JSON dump */
+<%- exindex %>
+</script>
+
+<div id="app">
+    <div>
+        <h5>Browsing: /{{ path.join("/") }}</h5>
+        <span>{{ Object.keys(cwd).length }} item(s) - {{ formatBytes(itemSize( cwd )) }}</span>
+    </div>
+    <table>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Modified</th>
+        </tr>
+        <tr v-if="path.length > 0">
+            <td><img :src="getIcon('*')"></td>
+            <td><span v-on:click="nav('*')">[...]</span></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr v-for="item, index in cwd">
+            <td><img :src="getIcon( item )"></td>
+            <td v-if="isDir(item)"><a :href="getLink( item )">{{ index }}</a></td>
+            <td v-if="!isDir(item)"><span v-on:click="nav( index )">{{ index }}</span></td>
+            <td :title="itemSize(item)">{{ formatBytes( itemSize( item ) ) }}</td>
+            <td>{{ item['mtime'] }}</td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    new Vue({
+        el : "#app",
+        data : {
+            path: [],
+            dir : {},
+            cwd : {}
+        },
+        methods: {
+            getLink : function(s){
+                return s['loc'];
+            },
+            itemSize : function(s){
+                if(s['size']) return s['size'];
+                else{
+                    function sumsize(o){
+                        var total = 0;
+                        Object.keys( o ).map(function( ri ){
+                            var item = o[ri];
+                            if(item['size']) total += +item['size'];
+                            else total += sumsize( item );
+                        })
+                        return total;
+                    }
+                    return sumsize( s );
+                }
+            },
+            isDir : function(s){
+                if(s === "*" || !s['mtime']) return false;
+                else return true;
+            },
+            getIcon : function(s){
+                if(s === '*') return icon_arrow;
+                if(s && !s['mtime']) return icon_folder;
+                else return icon_file;
+            },
+            formatBytes: function (a, b) {
+                if (0 === a) return "0 Bytes";
+                var c = 1024, d = b || 2, e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],  f = Math.floor(Math.log(a) / Math.log(c));
+                return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f];
+            },
+            travel : function(path){
+                var current = this.dir;
+                var valid   = true;
+                for(var item in path){
+                    if(current[path[item]]){
+                        current = current[path[item]];
+                        if(current['mtime']) valid = false;
+                    } else valid = false;
+                }
+                return { valid : valid, obj : current, path : path };
+            },
+            nav : function(target){
+                var temp = JSON.parse(JSON.stringify(this.path));
+                if(target === "*") temp.splice(-1, 1);
+                else temp.push(target);
+                var response = this.travel( temp );
+                if(response.valid === true){
+                    this.path = response.path;
+                    this.cwd = response.obj;
+                }
+            }
+        },
+        mounted : function(){
+            this.$nextTick(function(){
+                // Create Structure as we go
+                for(var i = 0; i < D.length; i++){
+                    var spl     = D[i].split("|").map(function(x){ return x.split("*"); });
+                    var base    = spl.shift();
+                    var lvls    = base[0].split("/");
+                    var files   = {};
+                    spl.map(function(item){
+                        if(item[0] !== ""){
+                            files[item[0].split("/").pop()] = {
+                                name : item[0].split("/").pop(),
+                                loc : item[0],
+                                mtime : item[1],
+                                size : item[2]
+                            };
+                        }
+                    })
+
+                    lvls.shift();
+
+                    var last = this.dir;
+
+                    if(lvls.length === 0) this.dir = Object.assign(files, this.dir);
+                    else{
+                        for(var l = 0; l < lvls.length; l++){
+                            if( !last[lvls[l]] ){
+                                last[lvls[l]] = files;
+                            }
+                            last = last[lvls[l]];
+                        }
+                    }
+
+                }
+
+                this.cwd = this.dir;
+            })
+        },
+        watch : {
+            "dir" : {
+                handler : function(){},
+                deep : true
+            }
+        }
+    })
+</script>
+</body>
+</html>
