@@ -48,14 +48,18 @@ function compactJS(data){
 
 module.exports = function(location, config){
     config = Object.assign({
+        pass : false,
+        root : null,
         name : 'Index of /' + path.basename(location),
         cooldown : 1000 * 60 * 10, // 10 minutes
         cache : null,
         template : "default",
         blacklist : [] // this won't be easy
     }, config);
-    return function(req, res){
+    return function(req, res, next){
+        if(!config.root) config.root = req.protocol + "://" + req.hostname + "/";
         var cacheready = false;
+
         var c = {
             extime : moment().format('L LTS'),
             exindex : compactJS( scanDir(location, config.root, config.blacklist) ),
@@ -73,10 +77,10 @@ module.exports = function(location, config){
         if(cacheready === true){
             ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){
                 if(config.cache && cacheready === true) fs.writeFileSync(config.cache, html);
-                res.send(html);
+                config.pass ? next() : res.send(html);
             });
         } else{
-            res.sendFile(config.cache);
+            config.pass ? next() : res.sendFile(config.cache);
         }
     }
 };

@@ -73,7 +73,9 @@
                         if(item[0] !== ""){
                             files[item[0].split("/").pop()] = {
                                 name : item[0].split("/").pop(),
-                                loc : item[0],
+                                loc : item[0]
+                                    .replace(/http:\//gi, 'http://')
+                                    .replace(/https:\//gi, 'https://'),
                                 mtime : item[1],
                                 size : item[2]
                             };
