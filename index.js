@@ -1,86 +1,99 @@
-var fs      = require('fs');
-var path    = require('path');
-var ejs     = require('ejs');
-var _file   = require('file');
-var moment  = require('moment');
+var fs          = require('fs');
+var ejs         = require('ejs');
+var path        = require('path');
+var parseUrl    = require('parseurl');
+var normalize   = path.normalize;
+var sep         = path.sep;
+var extname     = path.extname;
+var join        = path.join;
+var resolve     = path.resolve;
 
-function scanDir(target, _root_, blacklist){
-    target = target.replace(/\\/g, '/');
-    if(typeof _root_ === "undefined") _root_ = target;
-    var outfiles = [];
-    var uni = function(x){ return moment(x).unix() };
-    // Walk through directory, return dirs and files
-    _file.walkSync(target, function(dir, lvl, files){
-        var valid   = true;
-        // Predefine top level & root
-        var top = { l : path.relative(path.join(target, '../'), dir).replace(/\\/g, '/'), s : 0, m : 0 };
-        // Cycle through files
-        files = files.map(function(file){
-            var loc     = path.join(dir, file).replace(/\\/g, '/');
-
-            var stat    = fs.statSync( loc );
-            // Add top level stats
-            if(top.s < stat.size) top.s += stat.size;
-            if( uni(top.m) < uni(stat.mtime) ) top.m = stat.mtime;
-            // Return compacted string
-            return [
-                path.join(_root_, path.relative(target, loc)).replace(/\\/g, '/'),
-                moment(stat['mtime']).format("L LTS"),
-                stat.size
-            ].join("*");
-            // Join files in same directory
-        }).join("|");
-        // Fix timestamp and skip empty files
-        if(valid){
-            files = [ top.l, moment(top.m).format("L LTS"), top.s ].join("*") + "|" + files;
-            files.length > 0 ? outfiles.push(files) : null;
-        }
-    });
-
-    return outfiles;
-}
-
-function compactJS(data){
-    return data.map(function(line){
-        return `D.push("${line}")`;
-    }).join("\n").replace(/\\/g, '/');
-}
-
-module.exports = function(location, config){
-    config = Object.assign({
-        pass : false,
-        root : null,
-        name : 'Index of /' + path.basename(location),
-        cooldown : 1000 * 60 * 10, // 10 minutes
-        cache : null,
-        template : "default",
-        blacklist : [] // this won't be easy
-    }, config);
-    return function(req, res, next){
-        if(!config.root) config.root = req.protocol + "://" + req.hostname + "/";
-        var cacheready = false;
-
-        var c = {
-            extime : moment().format('L LTS'),
-            exindex : compactJS( scanDir(location, config.root, config.blacklist) ),
-            exname : config.name
-        };
-
-        if(config.cache !== null){
-            if( fs.existsSync(config.cache) === true ){
-                var now = moment().unix();
-                var then = moment(fs.statSync(config.cache)['mtime']).unix();
-                if((now - then) * 1000 >= config.cooldown) cacheready = true;
-            } else cacheready = true;
-        } else cacheready = true;
-
-        if(cacheready === true){
-            ejs.renderFile( path.join( __dirname, 'templates/' + config.template + '.ejs'), c, function(err, html){
-                if(config.cache && cacheready === true) fs.writeFileSync(config.cache, html);
-                config.pass ? next() : res.send(html);
-            });
-        } else{
-            config.pass ? next() : res.sendFile(config.cache);
-        }
+function getRequestedDir (req) {
+    try {
+        return decodeURIComponent(parseUrl(req).pathname)
+    } catch (e) {
+        console.error(e);
+        return null
     }
-};
+}
+
+// Vastly inspired and influenced by serve-index
+// This is a simple alternative made for personal use
+function exindex(root, options = {}) {
+
+    options.theme   = options.theme || "default";
+    var theme       = fs.readdirSync( join(__dirname, 'render/style') );
+    var errhand     = options['error'] || {};
+
+    if (!errhand[404]) errhand[404] = function (req, res) {
+        res.status(404).send("404: Not Found");
+    };
+
+    if (!errhand[400]) errhand[400] = function (req, res) {
+        res.status(400).send("400: Bad Request");
+    };
+
+    if (!errhand[403]) errhand[403] = function (req, res) {
+        res.status(403).send("403: Forbidden");
+    };
+
+    if (!root) throw new TypeError('Root path required');
+    var rootPath = normalize(resolve(root) + sep);
+
+    return function (req, res, next) {
+        var dir = getRequestedDir(req);
+        if (dir === null) return errhand[400](req, res);
+        var originalUrl = parseUrl.original(req);
+        var originalDir = decodeURIComponent(originalUrl.pathname);
+        var path = normalize(join(rootPath, dir));
+        if (~path.indexOf('\0')) return errhand[400](req, res);
+        if ((path + sep).substr(0, rootPath.length) !== rootPath) {
+            return errhand[403](req, res);
+        }
+
+        var css         = ".no-style-defined{}";
+        var html        = "";
+
+        if(theme.indexOf(`${options.theme}.css`) > -1){
+            css = fs.readFileSync(
+                join(__dirname, `render/style/${options.theme}.css`)
+            );
+        }
+
+        if (fs.existsSync(path)) {
+            fs.readdirSync(path).forEach(function (file) {
+
+                var loc = join(path, file);
+                var data = fs.statSync(loc);
+
+                data.name = file;
+                data.type = extname(file).toLowerCase().replace(/./, '');
+                if (data.isDirectory()) data.type = 'dir';
+
+                ejs.renderFile(
+                    join(__dirname, "render/file.ejs"),
+                    {file: data},
+                    {},
+                    function (err, str) {
+                        html += str;
+                    }
+                );
+
+            });
+        } else {
+            return errhand[404](req, res);
+        }
+
+        res.render(
+            join(__dirname, "render/directory.ejs"),
+            {
+                contents: html,
+                indexName: dir,
+                isRoot: rootPath === path,
+                css : css
+            }
+        );
+    };
+}
+
+module.exports = exindex;

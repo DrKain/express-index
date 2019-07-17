@@ -1,11 +1,11 @@
 {
   "name": "express-index",
-  "version": "0.1.4",
+  "version": "0.2.3",
   "dependencies": {
     "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "file": "^0.2.2",
-    "moment": "^2.24.0"
+    "parseurl": "latest"
   },
   "author": {
     "name": "Kain",
@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/DrKain/express-index/issues"
   },
-  "description": "Express middleware to generate a clean, interactive, configurable directory index.",
+  "description": "Express middleware to generate a clean, interactive, simple directory index.",
   "homepage": "https://github.com/DrKain/express-index",
   "keywords": [
     "express",
